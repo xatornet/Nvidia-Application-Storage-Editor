@@ -14,27 +14,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up MinGW (GCC)
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
-
-      - name: Verify GCC version
-        run: gcc --version
+      - name: Install MinGW (GCC) via Chocolatey
+        run: |
+          choco install mingw -y
+          echo "##vso[task.prependpath]C:\ProgramData\mingw64\mingw64\bin"
+          refreshenv
+          gcc --version
 
       - name: Build NvConfigEditor.exe
+        shell: cmd
         run: |
           gcc main.c cJSON.c -o NvConfigEditor.exe -mwindows -lcomctl32 -ladvapi32 -lshcore
-          echo "Compilación completada correctamente."
+          echo Build OK
 
       - name: Create release folder
         run: |
           mkdir release
-          move NvConfigEditor.exe release/
-          copy cJSON.h release/
+          move NvConfigEditor.exe release\
+          copy cJSON.h release\
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: NvConfigEditor-Windows
-          path: release/
+          path: release\
+
